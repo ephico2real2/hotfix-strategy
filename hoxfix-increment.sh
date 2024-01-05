@@ -3,10 +3,7 @@
 # Exit script if any command fails
 set -e
 
-# Check current branch
-CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-
-# Function to update the POM version
+# Function to update the POM version and verify the update
 update_pom_version() {
     # Use Maven to get the current project version, suppressing transfer progress
     CURRENT_VERSION=$(mvn --no-transfer-progress help:evaluate -Dexpression=project.version -q -DforceStdout)
@@ -26,6 +23,13 @@ update_pom_version() {
 
     # Use Maven to set the new version, suppressing transfer progress
     mvn --no-transfer-progress build-helper:parse-version versions:set -DnewVersion="$NEW_VERSION" versions:commit
+
+    # Verify the new version
+    UPDATED_VERSION=$(mvn --no-transfer-progress help:evaluate -Dexpression=project.version -q -DforceStdout)
+    if [ "$UPDATED_VERSION" != "$NEW_VERSION" ]; then
+        echo "Error: Version update verification failed. Expected $NEW_VERSION, but found $UPDATED_VERSION."
+        exit 1
+    fi
 }
 
 # Function to commit and tag the new version

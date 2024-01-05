@@ -55,7 +55,7 @@ commit_and_tag() {
 }
 
 # Main script execution
-if [[ $CURRENT_BRANCH =~ -hotfix$ ]]; then
+if [[ $CURRENT_BRANCH =~ .*-hotfix$ ]]; then
     echo "Hotfix branch detected, updating version."
     update_pom_version
     commit_and_tag
